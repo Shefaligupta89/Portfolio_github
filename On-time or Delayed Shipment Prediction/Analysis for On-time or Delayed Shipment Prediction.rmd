@@ -1,0 +1,480 @@
+---
+title: "Capstone Project"
+author: "Group 1"
+date: "2023-06-30"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+shipment_tracking <- read.csv("C:/Users/AJ/Downloads/edata.csv")
+# Display the first few rows of the dataset
+head(shipment_tracking)
+```
+
+```{r}
+#Shape of the dataset
+dim(shipment_tracking)
+```
+
+```{r}
+#Printing the Structure of the data
+str(shipment_tracking)
+```
+
+```{r}
+#Summary of the shipment dataset
+summary(shipment_tracking)
+```
+```{r}
+#Removing ID Column
+shipment_tracking <- shipment_tracking[, -which(names(shipment_tracking) == "ID")]
+
+#Removed ID COlumn
+```
+
+```{r}
+#Checking if there are any missing values column wise
+missing_counts = colSums(is.na(shipment_tracking))
+print(missing_counts)
+```
+```{r}
+# Create a bar plot to visualize the missing values
+barplot(missing_counts, main = "Null Values", xlab = "Variables", ylab = "Count")
+```
+```{r}
+#Separating Categorical and Numerical Columns
+# Function to analyze and display frequency distribution of a categorical variable
+analyze_categorical <- function(variable) {
+  freq <- table(variable)
+  freq_df <- as.data.frame(freq)
+  colnames(freq_df) <- c("Category", "Count")
+  freq_df <- freq_df[order(freq_df$Count, decreasing = TRUE), ]
+  print(freq_df)
+}
+
+# Extract categorical variables
+categorical_shipment <- shipment_tracking[, sapply(shipment_tracking, is.factor) | sapply(shipment_tracking, is.character)]
+
+# Extract numerical variables
+numerical_shipment <- shipment_tracking[, sapply(shipment_tracking, is.numeric) | sapply(shipment_tracking, is.integer)]
+
+
+```
+```{r}
+
+# Descriptive analysis of numeric variables
+cost_summary <- summary(shipment_tracking$Cost_of_the_Product)
+weight_summary <- summary(shipment_tracking$Weight_in_gms)
+care_calls_summary <- summary(shipment_tracking$Customer_care_calls)
+rating_summary <- summary(shipment_tracking$Customer_rating)
+prior_purchases_summary <- summary(shipment_tracking$Prior_purchases)
+discount_summary <- summary(shipment_tracking$Discount_offered)
+
+
+# Convert summary statistics into numeric vectors
+cost_vals <- as.numeric(cost_summary)
+weight_vals <- as.numeric(weight_summary)
+care_calls_vals <- as.numeric(care_calls_summary)
+rating_vals <- as.numeric(rating_summary)
+prior_purchases_vals <- as.numeric(prior_purchases_summary)
+discount_vals <- as.numeric(discount_summary)
+
+
+# Set the layout for the plot grid
+par(mfrow = c(3, 2))
+# Create individual bar plots for each numeric variable
+barplot(cost_vals, main = "Cost of the Product")
+barplot(weight_vals, main = "Weight in grams")
+barplot(care_calls_vals, main = "Customer Care Calls")
+barplot(rating_vals, main = "Customer Rating")
+barplot(prior_purchases_vals, main = "Prior Purchases")
+barplot(discount_vals, main = "Discount Offered")
+
+```
+```{r}
+
+numeric_vars <- c("Cost_of_the_Product", "Weight_in_gms", "Customer_care_calls", "Customer_rating", "Prior_purchases", "Discount_offered")
+
+# Set the layout for the plot grid
+par(mfrow = c(2, 3))
+
+# Create boxplots for each numerical variable
+for (var in numeric_vars) {
+  # Plot the boxplot
+  boxplot(shipment_tracking[[var]], main = var)
+}
+
+```
+```{r}
+# #Replacing extreme values with less extreme values using winsorize by introducing percentiles
+# 
+# # Winsorize outliers in "Prior_purchases" variable
+q <- quantile(shipment_tracking$Prior_purchases, c(0.05, 0.95), na.rm = TRUE)  # Set the threshold percentiles
+# shipment_tracking$Prior_purchases <- pmin(pmax(shipment_tracking$Prior_purchases, q[1]), q[2])
+# 
+# # Winsorize outliers in "Discount_offered" variable
+ q <- quantile(shipment_tracking$Discount_offered, c(0.05, 0.95), na.rm = TRUE)  # Set the threshold percentiles
+shipment_tracking$Discount_offered <- pmin(pmax(shipment_tracking$Discount_offered, q[1]), q[2])
+```
+
+
+```{r}
+#Checking box plots after performing winsorize method
+numeric_vars <- c("Cost_of_the_Product", "Weight_in_gms", "Customer_care_calls", "Customer_rating", "Prior_purchases", "Discount_offered")
+
+# Set the layout for the plot grid
+par(mfrow = c(2, 3))
+
+# Create boxplots for each numerical variable
+for (var in numeric_vars) {
+  # Plot the boxplot
+  boxplot(shipment_tracking[[var]], main = var)
+}
+
+
+```
+```{r}
+#Summary of All Numerical Variables
+summary(numerical_shipment)
+```
+
+```{r}
+#Visualizing the Numerical Variables
+# Select the numerical variables for histogram plots
+numeric_vars <- c("Cost_of_the_Product", "Weight_in_gms", "Customer_care_calls", "Customer_rating", "Prior_purchases", "Discount_offered")
+
+# Create histogram plots for each numerical variable
+par(mfrow = c(2, 3)) # Set the layout for the plot grid
+for (var in numeric_vars) {
+  hist(shipment_tracking[[var]], main = var, xlab = var)
+}
+```
+```{r}
+#Correlation Analysis
+# Install and load required packages
+#install.packages("ggplot2")  # Install ggplot2 package
+library(ggplot2)  # Load ggplot2 package
+
+# Compute correlation matrix
+cor_matrix <- cor(numerical_shipment)
+
+# Create a long format of the correlation matrix
+cor_df <- reshape2::melt(cor_matrix)
+
+# Create correlation heatmap
+ggplot(cor_df, aes(Var1, Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "#F8766D", mid = "white", high = "#00BFC4", midpoint = 0, na.value = "grey50") +
+  labs(title = "Correlation Heatmap", x = "", y = "") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size = 18, face = "bold"))
+
+
+```
+```{r}
+# Install and load required packages
+#install.packages("corrplot")  # Install corrplot package
+library(corrplot)  # Load corrplot package
+
+# Compute correlation matrix
+cor_matrix <- cor(numerical_shipment)
+
+print(cor_matrix)
+```
+```{r}
+# Create correlation heatmap
+corrplot(cor_matrix, method = "color", type = "upper", tl.col = "black",
+         tl.srt = 45, tl.cex = 0.8, tl.offset = 1, cl.lim = c(-1, 1),
+         addCoef.col = "black", number.cex = 0.8, number.digits = 2,
+         diag = FALSE, outline = TRUE)
+```
+```{r}
+#points to note from Correlation Analysis
+
+# Discount_offered has a moderate positive correlation coefficient of 0.397 with Reached.on.Time_Y.N. This suggests that a higher discount offered may be associated with a higher likelihood of reaching on time. However, correlation alone does not establish causation, so further analysis is required.
+# 
+# Cost_of_the_Product and Customer_care_calls both have negative correlation coefficients with Reached.on.Time_Y.N, but the magnitudes of the correlations are relatively weak (-0.074 and -0.067, respectively). This indicates a potential but weak negative relationship.
+# 
+# Other features such as Customer_rating, Prior_purchases, and Weight_in_gms do not show strong correlations with Reached.on.Time_Y.N based on the provided correlation matrix.
+
+```
+
+
+```{r}
+#Technique-2 Anova
+
+# Assuming you have a data frame called 'df' with the relevant variables
+
+# Fit the ANOVA model
+model <- aov(Reached.on.Time_Y.N ~ Customer_care_calls + Customer_rating + Cost_of_the_Product + Prior_purchases + Discount_offered + Weight_in_gms, data = numerical_shipment)
+
+# Perform ANOVA analysis
+anova_result <- anova(model)
+
+# View the ANOVA table
+print(anova_result)
+
+```
+```{r}
+#Points to note from Anova Analysis
+
+# In summary, the ANOVA analysis indicates that Customer_care_calls, Cost_of_the_Product, Prior_purchases,
+# Discount_offered, and Weight_in_gms are statistically significant predictors of the target variable 
+# Reached.on.Time_Y.N. However, Customer_rating does not have a statistically significant relationship
+# with the target variable based on the given significance level
+```
+
+```{r}
+# Install and load the 'MASS' package for stepwise regression
+#install.packages("MASS")
+library(MASS)
+
+# Perform stepwise regression using the 'stepAIC' function
+model <- lm(Reached.on.Time_Y.N ~ Customer_care_calls + Customer_rating + Cost_of_the_Product + Prior_purchases + Discount_offered + Weight_in_gms, data = numerical_shipment)  # Full model with all predictor variables
+step_model <- stepAIC(model, direction = "both")  # Stepwise regression with both forward and backward selection
+
+# Print the summary of the final stepwise regression model
+summary(step_model)
+
+```
+```{r}
+# Based on the stepwise regression analysis, the important variables for 
+# predicting the target variable "Reached.on.Time_Y.N" are:
+# 
+# 1.Customer_care_calls
+# 2.Cost_of_the_Product
+# 3.Prior_purchases
+# 4.Discount_offered
+# 5.Weight_in_gms
+# These variables have been selected based on their contribution to the model's fit,
+# as indicated by the p-values and the AIC (Akaike Information Criterion) values. 
+# These variables have statistically significant coefficients and are considered 
+# important in predicting the target variable.
+```
+
+
+
+```{r}
+# Now Analyzing Categorical variables
+for (col in names(categorical_shipment)) {
+  cat("\n")
+  cat("Variable:", col, "\n")
+  analyze_categorical(shipment_tracking[[col]])
+}
+```
+
+
+```{r}
+# Set the layout for the plot grid
+par(mfrow = c(3, 2))
+# Create individual bar plots for each categorical variable
+barplot(table(shipment_tracking$Warehouse_block), main = "Warehouse Block")
+barplot(table(shipment_tracking$Mode_of_Shipment), main = "Mode of Shipment")
+barplot(table(shipment_tracking$Gender), main = "Gender")
+barplot(table(shipment_tracking$Product_importance), main = "Product Importance")
+barplot(table(shipment_tracking$Reached.on.Time_Y.N), main = "Reached on Time")
+# Reset the layout
+par(mfrow = c(1, 1))
+
+```
+```{r}
+#Performing Chi Square test 
+
+# Create a vector of categorical variable names
+categorical_vars <- c("Warehouse_block", "Mode_of_Shipment","Gender", "Product_importance", "Reached.on.Time_Y.N")
+
+# Initialize an empty list to store the results
+chi_square_results <- list()
+
+
+for (var in categorical_vars) {
+  print(var)
+
+  table_data <- table(shipment_tracking[[var]], shipment_tracking$Reached.on.Time_Y.N)
+  print(table_data)
+  
+  
+  # Perform chi-square test
+  chi_result <- chisq.test(table_data)
+  
+  # Print the results
+  print(chi_result)
+}
+
+
+```
+
+
+```{r}
+#Performing Chi Square test 
+
+# Create a vector of categorical variable names
+categorical_vars <- c("Warehouse_block", "Mode_of_Shipment","Gender", "Product_importance", "Reached.on.Time_Y.N")
+
+# Initialize an empty list to store the results
+chi_square_results <- list()
+
+
+for (var in categorical_vars) {
+  print(var)
+
+  table_data <- table(shipment_tracking[[var]], shipment_tracking$Reached.on.Time_Y.N)
+  print(table_data)
+  
+  # Optionally, create a bar plot to visualize the relationship
+  barplot(table_data, beside = TRUE, legend = TRUE, col = c("#E69F00", "#56B4E9"),
+          main = paste("Shipment Reached", var), xlab = var, ylab = "Frequency")
+  
+  # Perform chi-square test
+  chi_result <- chisq.test(table_data)
+  
+  # Print the results
+  print(chi_result)
+}
+
+```
+
+```{r}
+#Important variable from Chi Square test
+#Product Importance
+
+
+```
+
+```{r}
+
+# Identify categorical variables
+categorical_vars <- sapply(shipment_tracking, is.factor)
+
+# Convert categorical variables to dummy variables
+one_hot_encoded <- model.matrix(~ 0 + Warehouse_block + Mode_of_Shipment + Gender + Product_importance, data = shipment_tracking)
+
+# Combine dummy variables with numerical variables
+encoded_data <- cbind(numerical_shipment, one_hot_encoded)
+
+#Removing Encoded data
+#encoded_data <- select(encoded_data,-"Customer_rating")
+
+# Perform PCA on the encoded data
+pca_result <- prcomp(encoded_data, scale. = TRUE)
+
+# Extract the principal components
+pcs <- pca_result$x
+
+# Extract the standard deviations (square roots of the eigenvalues)
+std_dev <- sqrt(pca_result$sdev)
+
+# Extract the proportion of variance explained by each principal component
+prop_var <- pca_result$sdev^2 / sum(pca_result$sdev^2)
+
+cumulative_var <- cumsum(prop_var)
+
+selected_pcs <- which(cumulative_var >= 0.7)  # Adjust the threshold as desired
+
+selected_variables <- encoded_data[apply(pcs[, selected_pcs, drop = FALSE], 2, function(x) any(abs(x) > 0.7))]
+
+# Get the variable names
+variable_names <- colnames(selected_variables)
+print("Selected Features:")
+print(variable_names)
+
+
+```
+```{r}
+
+# Get the variable names
+variable_names <- colnames(encoded_data)
+
+# Create a scree plot with labeled bars
+barplot(prop_var, names.arg = paste0("PC", 1:length(prop_var)), xlab = "Principal Components", ylab = "Proportion of Variance Explained", main = "Scree Plot")
+
+# Add variable names to the bars
+text(x = 1:length(prop_var), y = prop_var, labels = variable_names, pos = 3, cex = 0.7, xpd = TRUE, col = "blue")
+
+# Rotate x-axis labels if needed
+par(las = 2)
+
+```
+```{r}
+# Perform PCA
+pca_result <- prcomp(encoded_data, scale. = TRUE)
+
+# Extract the principal components
+pcs <- pca_result$x
+
+# Extract the loadings (correlation between original features and principal components)
+loadings <- pca_result$rotation
+
+# Calculate the feature importance as the absolute sum of loadings across all principal components
+feature_importance <- colSums(abs(loadings))
+
+# Create a data frame with variable names and their importance
+importance_df <- data.frame(Variable = colnames(encoded_data), Importance = feature_importance)
+
+# Sort the features based on their importance
+sorted_importance <- importance_df[order(importance_df$Importance, decreasing = TRUE), ]
+
+# Print the variable names and their importance
+print(sorted_importance)
+```
+
+```{r}
+# Perform PCA
+pca_result <- prcomp(encoded_data, scale. = TRUE)
+
+# Extract the principal components
+pcs <- pca_result$x
+
+# Extract the loadings (correlation between original features and principal components)
+loadings <- pca_result$rotation
+
+# Calculate the feature importance as the absolute sum of loadings across all principal components
+feature_importance <- colSums(abs(loadings))
+
+# Create a bar plot of feature importance
+barplot(feature_importance, names.arg = colnames(encoded_data), xlab = "Variable", ylab = "Feature Importance", main = "PCA Feature Importance")
+
+# Add text labels for variable names and their positions
+text(x = 1:length(feature_importance), y = feature_importance, labels = colnames(encoded_data), pos = 3, cex = 0.7, xpd = TRUE, col = "blue")
+
+# Rotate x-axis labels if needed
+par(las = 2)
+
+
+```
+```{r}
+library(randomForest)
+
+
+
+# Split the data into training and testing sets
+set.seed(123)  # For reproducibility
+train_indices <- sample(1:nrow(encoded_data), 0.7*nrow(encoded_data))
+train_data <- shipment_tracking[train_indices, ]
+test_data <- shipment_tracking[-train_indices, ]
+
+# Train a random forest model
+rf_model <- randomForest(Reached.on.Time_Y.N ~ Customer_care_calls + Cost_of_the_Product + Prior_purchases +  Discount_offered + Weight_in_gms + Reached.on.Time_Y.N + Warehouse_blockA + Warehouse_blockB + Warehouse_blockD + Warehouse_blockF + Mode_of_ShipmentRoad + Mode_of_ShipmentShip + Product_importancelow + Product_importancemedium, data = encoded_data, ntree = 100)
+
+# Extract feature importance scores
+importance_scores <- importance(rf_model)
+
+# Print the feature importance scores
+print(importance_scores)
+
+# Visualize the feature importance
+varImpPlot(rf_model)
+```
+
+
