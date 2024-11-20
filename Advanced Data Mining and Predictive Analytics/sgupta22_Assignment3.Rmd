@@ -1,0 +1,175 @@
+---
+title: "sgupta22_Assignment3_Advanced Data Mining and Predictive Analytics"
+author: "Shefali Gupta"
+date: "2024-04-16"
+output: html_document
+---
+
+### ***Part - A***
+
+#### ***Question A-1. What is the difference between SVM with hard margin and soft margin?***
+
+*<b><u>Support Vector Machines (SVM) Overview:</b></u>*
+Support Vector Machines (SVM) are a type of supervised machine learning algorithm used for classification and regression tasks. The main idea behind SVM is to find the best possible decision boundary that separates different classes in the data space.
+
+*<b><u>Hard Margin SVM:</b></u>*
+- Hard margin SVM seeks to find a hyperplane that perfectly separates the classes in the training data.
+- It assumes that the data is linearly separable, meaning there exists a straight line (or hyperplane in higher dimensions) that can cleanly separate the classes without any misclassifications.
+- Hard margin SVM is sensitive to outliers and noise in the data. Even a single outlier can significantly affect the placement of the hyperplane or make it impossible to find a separating hyperplane.
+
+*<b><u>Soft Margin SVM:</b></u>*
+- Soft margin SVM is an extension of hard margin SVM that allows for some misclassifications or overlapping of classes.
+- It is designed to handle scenarios where the data is not perfectly separable by a hyperplane. In real-world datasets, perfect separation is often not achievable due to noise or inherent overlap between classes.
+- Soft margin SVM introduces a penalty parameter (C) that controls the trade-off between maximizing the margin and minimizing the classification errors. A smaller value of C results in a wider margin but allows more misclassifications, while a larger value of C leads to a narrower margin with fewer misclassifications.
+
+In summary, hard margin SVM aims for perfect separation without any errors, while soft margin SVM allows for some flexibility by permitting a certain degree of misclassification to accommodate real-world data scenarios.
+
+#### ***Question A-2. What is the role of the cost parameter, C, in SVM (with soft margin) classifiers?***
+
+- **<b><u>Controlling Misclassification:</b></u>** The cost parameter, \(C\), regulates the penalty assigned to misclassifications during the training process. 
+  - A smaller value of \(C\) allows for a more flexible margin, permitting a higher number of misclassifications.
+  - Conversely, a larger value of \(C\) imposes a stricter penalty on misclassifications, resulting in a narrower margin and fewer errors.
+
+- **<b><u>Balancing Margin Width and Misclassifications:</b></u>** By adjusting the value of \(C\), the SVM algorithm can strike a balance between achieving a wider margin (to improve generalization) and tolerating a certain level of misclassification. 
+  - Lower values of \(C\) prioritize a broader margin, potentially leading to increased misclassifications but enhancing the model's ability to generalize.
+  - Higher values of \(C\) prioritize minimizing misclassifications, potentially resulting in a narrower margin but reducing the likelihood of errors on the training data.
+
+- **<b><u>Regularization:</b></u>** The cost parameter,\(C\), acts as a form of regularization in SVM classifiers, helping prevent overfitting by controlling the model's complexity.
+  - A smaller value of \(C\) imposes a weaker regularization constraint, allowing the model to be more flexible and potentially overfit the training data.
+  - Conversely, a larger value of \(C\) imposes a stronger regularization constraint, encouraging the model to prioritize simpler decision boundaries that generalize better to unseen data.
+
+In summary, the <b><u>cost parameter \(C\)</b></u> in <b><u>SVM classifiers with a soft margin</b></u> plays a <b><u>crucial role</b></u> in <b><u>balancing</b></u> the <b><u>trade-off</b></u> between <b><u>margin width</b></u> and <b><u>misclassifications</b></u>, thereby influencing the <b><u>model's ability to generalize</b></u> and its susceptibility to <b><u>overfitting</b></u>. <b><u>Adjusting \(C\)</b></u> allows practitioners to <b><u>fine-tune</b></u> the <b><u>model's behavior</b></u> based on the <b><u>specific requirements</b></u> of the <b><u>problem domain</b></u> and the <b><u>characteristics</b></u> of the <b><u>training data</b></u>.
+
+#### ***Question A-3. Will the following perceptron be activated (2.8 is the activation threshold)?***
+
+*The equation would be*
+$$(0.1)*(0.8) + 11.1*(-0.2)$$
+
+```{r}
+Input = (0.1)*(0.8) + 11.1*(-0.2)
+print(Input)
+```
+
+*<b><u>Answer A-3:</b></u> As the computed weighted sum of inputs (-2.14) is less than the activation threshold (2.8), the perceptron will stay inactive.*
+
+#### ***Question A-4. What is the role of alpha, the learning rate in the delta rule?***
+
+*<b><u>Response:</b></u>*
+
+In the context of the delta rule, <b><u>**alpha**</b></u>, commonly referred to as the <b><u>**learning rate**</b></u>, holds significant importance. It serves as a crucial parameter that determines the rate at which weights of the connections between neurons are adjusted during the training phase of a neural network. 
+
+The role of <b><u>**alpha**</b></u> is to control the magnitude of updates applied to the weights in response to the calculated error. A higher value of <b><u>**alpha**</b></u> results in larger adjustments to the weights, potentially leading to faster convergence towards an optimal solution. Conversely, a lower value of <b><u>**alpha**</b></u> results in smaller weight updates, which can slow down the learning process but may offer more stable convergence and finer adjustments.
+
+The choice of the <b><u>**alpha**</b></u> value is a delicate balance. A too high <b><u>**alpha**</b></u> value may cause the model to overshoot the optimal solution or oscillate around it, while a too low <b><u>**alpha**</b></u> value may lead to slow convergence and prolonged training times.
+
+Therefore, selecting an appropriate <b><u>**alpha**</b></u> value is critical for achieving efficient and effective learning in neural networks. It requires careful experimentation and tuning to strike the right balance between convergence speed and stability.
+
+In summary, <b><u>**alpha**</b></u>, the learning rate, plays a pivotal role in the delta rule by influencing the rate of weight adjustments during training. Its careful selection is essential for optimizing the performance of neural networks and ensuring successful learning outcomes.
+
+### ***Part B*** 
+
+#### ***This part of the assignment involves building SVM and neural network regression models to answer a number of questions. We will use the Carseats dataset that is part of the ISLR package (you need to install and load the library). We may also need the following packages: caret, dplyr and glmnet***
+
+#Loading required libraries
+```{r}
+library(ISLR)
+library(dplyr)
+library(glmnet)
+library(caret)
+library(neuralnet)
+```
+```{r}
+Carseats_Filtered  <- Carseats %>% select("Sales", "Price", "Advertising","Population","Age","Income","Education")
+```
+
+#Viewing Summary and Checking for Null Values
+```{r}
+summary(Carseats_Filtered)
+```
+#### ***Question B-1. Build a linear SVM regression model to predict Sales based on all other attributes ("Price","Advertising", "Population", "Age", "Income" and "Education"). Hint: use caret train() with method set to “svmLinear”. What is the R-squared of the model?***
+
+```{r}
+set.seed(2019)
+
+# Creating train-test split
+random_index <- createDataPartition(Carseats_Filtered$Sales, p = 0.7, list = FALSE)
+train_data <- Carseats_Filtered[random_index, ]
+test_data <- Carseats_Filtered[-random_index, ]
+
+# Training linear SVM regression model
+linear_svm_model <- train(
+  Sales ~ .,
+  data = train_data,
+  method = "svmLinear",
+  trControl = trainControl(method = "cv", number = 5)
+)
+
+# Displaying model summary
+linear_svm_model
+```
+
+*Answer B-1: The \(R^2\) value for the model is \(0.3344192\).*
+
+#### ***Question B-2. Customize the search grid by checking the model’s performance for C parameter of 0.1,.5,1 and 10 using 2 repeats of 5-fold cross validation.***
+
+```{r}
+
+# Defining the search grid
+svm_custom_grid <- expand.grid(C = c(0.1, 0.5, 1, 10))
+
+# Building SVM regression model with customized search grid
+svm_custom_model <- train(
+  Sales ~ .,
+  data = train_data,
+  method = "svmLinear",
+  trControl = trainControl(method = "cv", number = 5, repeats = 2),
+  tuneGrid = svm_custom_grid,
+  tuneLength = 10
+)
+svm_custom_model
+
+```
+
+*Answer B-2. The model's performance varied across different values of the \(C\) parameter, ranging from 0.1 to 10.0, during 2 repeats of 5-fold cross-validation. Initially, the \(R^2\) value was lowest at approximately 0.332 for \(C = 0.1\), indicating that about 33.2% of the variance in Sales was explained by the model. However, as \(C\) increased, the \(R^2\) values improved, reaching a maximum of approximately 0.334 for \(C = 0.5\). Consequently, \(C = 0.5\) was chosen as the optimal parameter for the SVM model.*
+
+#### ***Question B-3.Train a neural network model to predict Sales based on all other attributes ("Price", "Advertising", "Population", "Age", "Income" and "Education"). Hint: use caret train() with method set to “nnet”. What is the R-square of the model with the best hyper parameters (using default caret search grid) – hint: don’t forget to scale the data.***
+
+```{r}
+set.seed(2019)
+
+fold_control_custom <- trainControl(method = 'cv', number = 10, verboseIter = FALSE)
+
+nn_custom_model <- train(
+  Sales ~ .,
+  data = train_data,
+  method = "nnet",
+  trControl = fold_control_custom,
+  preProcess = c("center", "scale"),
+  trace = FALSE
+)
+
+nn_custom_model
+
+optimal_custom_model <- nn_custom_model$finalModel
+optimal_custom_rsquared <- optimal_custom_model$Rsquared
+optimal_custom_rsquared
+
+```
+*Answer B-3. The selected model has a size parameter of 1 and a decay parameter of 1e-04, which was determined as the most optimal based on RMSE. However, the specific \(R^2\) value for this model is marked as "NaN" (Not a Number), indicating an undefined value. The nearest \(R^2\) value is approximately 0.331, associated with a model having a size parameter of 1 and a decay parameter of 1e-01.*
+
+#### ***Question B-4: Consider the following input:Sales=9, Price=6.54, Population=124, Advertising=0, Age=76, Income= 110, Education=10. What will be the estimated Sales for this record using the above neuralnet model?***
+
+```{r}
+set.seed(2019)
+
+carseats_new_data <- data.frame("Price" = 6.54, "Population" = 124, "Advertising" = 0, "Age" = 76, "Income" = 110, "Education" = 10)
+
+predicted_output  <- predict(nn_custom_model, carseats_new_data)
+
+predicted_output
+```
+*Answer B-4. According to the neural network model utilized, the projected sales value amounts to $1.*
+
+
+
+
