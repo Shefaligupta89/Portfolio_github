@@ -18,7 +18,7 @@ I specialize in **machine learning**, **data visualization**, and **ETL processe
 
 ## 📂 **Highlighted Projects**  
 
-### 1. **[Portage Animal Protective League Dashboard](#)**  
+### 1. **Portage Animal Protective League Dashboard**  
 - **Tools:** Power BI  
 - **Description:** Interactive dashboard developed to improve operational efficiency and support humane animal stewardship initiatives.  
 
