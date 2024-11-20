@@ -49,9 +49,8 @@ I specialize in **machine learning**, **data visualization**, and **ETL processe
 
 ## 📫 **Get in Touch**  
 Feel free to connect with me for collaboration, mentorship, or opportunities:  
-- **Email:** [Your Email]  
-- **LinkedIn:** [Your LinkedIn URL]  
-- **Portfolio:** [Portfolio URL]  
+- **Email:** shefalipgupta@gmail.com
+- **LinkedIn:** https://www.linkedin.com/in/shefalipgupta/
 
 Let’s turn data into impactful insights! 🚀  
 
